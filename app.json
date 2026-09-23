@@ -1,0 +1,60 @@
+{
+  "expo": {
+    "name": "MyBusStop",
+    "slug": "mybusstop",
+    "version": "1.0.3",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "mybusstop",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ca.gstcyr.stlgps",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Used to center the map near you.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "ca.gstcyr.stlgps",
+      "permissions": ["android.permission.USE_EXACT_ALARM"],
+      "adaptiveIcon": {
+        "backgroundColor": "#1565C0",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "versionCode": 3
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "react-native-maps",
+        {}
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#1565C0",
+          "icon": "./assets/notification-icon.png"
+        }
+      ],
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "276dd835-e857-4bce-b7d0-9e9c020fce4a"
+      }
+    },
+    "owner": "gstcyr",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/276dd835-e857-4bce-b7d0-9e9c020fce4a"
+    }
+  }
+}
