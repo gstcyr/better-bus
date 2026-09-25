@@ -340,7 +340,12 @@ export default function MapScreen({ navigation, route }: Props) {
     ? minutesUntil(estimatedArrival(myStop, delayMinutes))
     : null;
   const busIsLive = !!delay && isTruthyFlag(delay.unit_visible);
-  const etaDisplay = busIsLive && myStopMinAway != null
+  // Only meaningful while the bus is live and hasn't passed the stop yet (once it
+  // passes, `arrived` takes over the display). A future ETA shows the countdown;
+  // a due/overdue-but-not-arrived stop shows "Arriving now"; offline shows "—".
+  const etaDisplay = !busIsLive
+    ? '—'
+    : myStopMinAway != null
       ? t('map.minValue', { n: myStopMinAway })
       : t('map.arrivingNow');
 
@@ -384,9 +389,11 @@ export default function MapScreen({ navigation, route }: Props) {
     }
   }, [myStop, routeName, delayMinutes]);
 
-  // Fit the map to all stops whenever the stop set changes.
+  // Fit the camera to the whole route. Reads stops from a ref so its identity is
+  // stable — it must NOT change every poll, or we'd refit (and fight the user's
+  // pan/zoom) on each 30s refresh.
   const fitToStops = useCallback(() => {
-    const coords = stops
+    const coords = stopsRef.current
       .filter((s) => Number.isFinite(s.lat) && Number.isFinite(s.long))
       .map((s) => ({ latitude: s.lat, longitude: s.long }));
     if (coords.length > 0) {
@@ -395,12 +402,17 @@ export default function MapScreen({ navigation, route }: Props) {
         animated: true,
       });
     }
-  }, [stops]);
+  }, []);
 
+  // Only fit when the stop SET actually changes (initial load or a route switch),
+  // never on a poll refresh. A poll returns an equal id list, so this signature's
+  // value is unchanged and the effect doesn't re-run — leaving the user's zoom.
+  const stopSig = useMemo(() => stops.map((s) => s.stop_id).join(','), [stops]);
   useEffect(() => {
+    if (!stopSig) return;
     const timer = setTimeout(fitToStops, 400);
     return () => clearTimeout(timer);
-  }, [fitToStops]);
+  }, [stopSig, fitToStops]);
 
   const initialRegion = useMemo(() => {
     const first = stops.find((s) => Number.isFinite(s.lat));
@@ -506,8 +518,7 @@ export default function MapScreen({ navigation, route }: Props) {
         {stops.map((s, i) => {
           if (!Number.isFinite(s.lat) || !Number.isFinite(s.long)) return null;
           const seq = Number(s.id);
-          const passed =
-            delay != null && Number.isFinite(seq) && seq <= delay.cur_stop;
+          const passed = delay != null && Number.isFinite(seq) && seq <= delay.cur_stop;
           const isSchool =
             (s.stop_location_type_description ?? '').toLowerCase() === 'school';
           const mine = !!s.is_mystop;
@@ -518,7 +529,11 @@ export default function MapScreen({ navigation, route }: Props) {
               : colors.primary;
           return (
             <Marker
-              key={`${s.stop_id}-${i}`}
+              // Encode the visual state in the key: react-native-maps snapshots a
+              // custom-child marker to a native bitmap and won't redraw it in place
+              // when `passed`/`mine` change on a poll. Changing the key remounts just
+              // the markers whose appearance actually flipped (cheap, occasional).
+              key={`${s.stop_id}-${i}-${passed ? 'p' : 'u'}${mine ? 'm' : ''}`}
               coordinate={{ latitude: s.lat, longitude: s.long }}
               onPress={() => onSelectStop(s)}
               anchor={{ x: 0.5, y: mine ? 1 : 0.5 }}
@@ -526,7 +541,7 @@ export default function MapScreen({ navigation, route }: Props) {
             >
               {mine ? (
                 <View style={styles.myStopMarker}>
-                  <View style={styles.myStopBubble}>
+                  <View style={[styles.myStopBubble, { backgroundColor: passed ? colors.textMuted : 'none' }]}>
                     <Text style={styles.myStopGlyph}>🏠</Text>
                   </View>
                   <View style={styles.myStopStem} />

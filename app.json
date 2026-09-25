@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "MyBusStop",
+    "name": "BetterBus",
     "slug": "mybusstop",
     "version": "1.0.3",
     "orientation": "portrait",
@@ -27,9 +27,7 @@
       "predictiveBackGestureEnabled": false,
       "versionCode": 3
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+    "platforms": ["android", "ios"],
     "plugins": [
       [
         "react-native-maps",

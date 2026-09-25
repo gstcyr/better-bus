@@ -30,11 +30,11 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "build:apk": ". ./android-env.sh && ./android/gradlew -p android assembleRelease && echo 'APK → android/app/build/outputs/apk/release/app-release.apk'",
-    "install:apk": ". ./android-env.sh && adb -s \"${ANDROID_SERIAL:-RFCYA0W6QGP}\" install -r android/app/build/outputs/apk/release/app-release.apk",
+    "install:apk": ". ./android-env.sh && adb install -r android/app/build/outputs/apk/release/app-release.apk",
     "apk": "npm run build:apk && npm run install:apk",
     "clean:android": ". ./android-env.sh && ./android/gradlew -p android clean",
-    "logcat": ". ./android-env.sh && adb -s \"${ANDROID_SERIAL:-RFCYA0W6QGP}\" logcat ReactNativeJS:V *:S",
-    "alarms": ". ./android-env.sh && adb -s \"${ANDROID_SERIAL:-RFCYA0W6QGP}\" shell dumpsys alarm | grep -A6 ca.gstcyr.stlgps"
+    "logcat": ". ./android-env.sh && adb logcat ReactNativeJS:V *:S",
+    "alarms": ". ./android-env.sh && adb shell dumpsys alarm | grep -A6 ca.gstcyr.stlgps"
   },
   "private": true
 }
